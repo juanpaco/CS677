@@ -58,16 +58,9 @@ class Bernoulli:
         if self.observed:
             return self.val
 
-        # TODO: I don't think this is the right P for these resamples
         t_likelihood = self.likelihood(1, depth=1)
         f_likelihood = self.likelihood(0, depth=1)
         normalized_likelihood = t_likelihood / (t_likelihood + f_likelihood)
-        # I don't think the normalization works properly.  It's using the actual
-        # value of the parent and not the proposed one.
-
-        #print('t like', t_likelihood)
-        #print('f like', f_likelihood)
-        #print('norm like', normalized_likelihood)
 
         self.val = numpy.random.binomial(1, normalized_likelihood)
 
