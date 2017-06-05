@@ -32,12 +32,25 @@ class Bernoulli:
         if target == 0:
             likelihood = 1 - likelihood
 
+        # This hack may require some repentance, but it gets the job done.
+        #   When doing the likelihood for the children, they'll need to use the
+        #   hypothetical value of this node, and not the actualy. So, we'll set
+        #   the value of this node to the hypothetical, get the child
+        #   likelihood, and then set it back.
+        #
+        # I can do this and sleep at night, because the value gets changed back
+        #   within this function, and the operation I use it for is read only.
+        old_val = self.val
+        self.val = target
+
         if depth > 0 and len(self.children) > 0:
             likelihood = reduce(
                     lambda l, child: l * child.likelihood(child.val),
                     self.children,
                     likelihood,
                 )
+
+        self.val = old_val
 
         return likelihood
 
@@ -46,7 +59,17 @@ class Bernoulli:
             return self.val
 
         # TODO: I don't think this is the right P for these resamples
-        self.val = numpy.random.binomial(1, self.likelihood(1, depth=1))
+        t_likelihood = self.likelihood(1, depth=1)
+        f_likelihood = self.likelihood(0, depth=1)
+        normalized_likelihood = t_likelihood / (t_likelihood + f_likelihood)
+        # I don't think the normalization works properly.  It's using the actual
+        # value of the parent and not the proposed one.
+
+        #print('t like', t_likelihood)
+        #print('f like', f_likelihood)
+        #print('norm like', normalized_likelihood)
+
+        self.val = numpy.random.binomial(1, normalized_likelihood)
 
         return self.val
 
