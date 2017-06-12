@@ -23,15 +23,3 @@ def test_tick():
     assert A.val == 1
     assert B.val == 1
     assert C.val == 1
-#def test_tick_that_should_have_a_false():
-#    numpy.random.seed(0)
-#
-#    network = [
-#            create_clamped(0),
-#            create_bernoulli(ps=[ .1, .75 ], parents=[ 0 ]),
-#        ]
-#
-#    next_vals = tick(network)
-#
-#    assert next_vals[0] == 0
-#    assert next_vals[1] == 0

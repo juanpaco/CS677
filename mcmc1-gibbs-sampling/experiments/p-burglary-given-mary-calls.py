@@ -6,7 +6,7 @@ from gibbs import sample
 Burglary = Bernoulli(name='Burglary', ps=.001)
 Earthquake = Bernoulli(name='Earthquake', ps=.002)
 Alarm = Bernoulli(name='Alarm', ps=[ .001, .29, .94, .95 ])
-JohnCalls = Bernoulli(name='JohnCalls', ps=[ .05, .90 ], val=1, observed=True)
+JohnCalls = Bernoulli(name='JohnCalls', ps=[ .05, .90 ], observed=False)
 MaryCalls = Bernoulli(name='MaryCalls', ps=[ .01, .70 ], val=1, observed=True)
 
 Burglary.add_child(Alarm)

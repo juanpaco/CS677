@@ -23,8 +23,8 @@ nodes = [ Burglary, Earthquake, Alarm, JohnCalls, MaryCalls ]
 
 samples = sample(nodes)
 
-# Check the Burglary count
-count = reduce(lambda count, s: count + s[0], samples, 0)
+# Check the Earthquake count
+count = reduce(lambda count, s: count + s[1], samples, 0)
 
 print(count)
 
