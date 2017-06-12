@@ -6,8 +6,8 @@ from nodes import (Bernoulli)
 def test_likelihood_bernoulli_alone():
     node = Bernoulli(name='not js', ps=0.3)
 
-    assert node.likelihood(target=True) == .3
-    assert node.likelihood(target=False) == .7
+    assert node.likelihood(target=1) == .3
+    assert node.likelihood(target=0) == .7
 
 def test_sample_bernoulli_alone():
     numpy.random.seed(0)
@@ -28,7 +28,7 @@ def test_likelihood_bernoulli_with_parent():
 #  \ /
 #   v
 #   C
-def test_likelihood_bernoulli_with_parent():
+def test_likelihood_bernoulli_with_parent_2():
     A = Bernoulli(name="A", ps=.3, val=1)
     B = Bernoulli(name="B", ps=.4, val=0)
     C = Bernoulli(name="C", ps=[ .3, .9, .2, .7 ], val=1)
@@ -38,23 +38,23 @@ def test_likelihood_bernoulli_with_parent():
     C.add_parent(A)
     C.add_parent(B)
 
-    # .7 * .2
-    assert A.likelihood(target=0, depth=1) == pytest.approx(.14, abs=.01)
+    # .7 * .3
+    assert A.complete_conditional(target=0) == pytest.approx(.21, abs=.01)
     # .3 * .2
-    assert A.likelihood(target=1, depth=1) == pytest.approx(.06, abs=.01)
+    assert A.complete_conditional(target=1) == pytest.approx(.06, abs=.01)
     # .6 * .2
-    assert B.likelihood(target=0, depth=1) == pytest.approx(.12, abs=.01)
-    # .4 * .2
-    assert B.likelihood(target=1, depth=1) == pytest.approx(.08, abs=.01)
-    assert C.likelihood(target=0, depth=1) == .8
-    assert C.likelihood(target=1, depth=1) == .2
+    assert B.complete_conditional(target=0) == pytest.approx(.12, abs=.01)
+    # .4 * .7
+    assert B.complete_conditional(target=1) == pytest.approx(.28, abs=.01)
+    assert C.complete_conditional(target=0) == .8
+    assert C.complete_conditional(target=1) == .2
 
 # A   B
 #  \ /
 #   v
 #   C
 def test_sample_bernoulli_with_parent():
-    numpy.random.seed(0)
+    numpy.random.seed(5)
 
     A = Bernoulli(name="A", ps=.7, val=1)
     B = Bernoulli(name="B", ps=.4, val=0)

@@ -10,9 +10,11 @@ class Bernoulli:
         self.parents = []
         self.children = []
 
-    def likelihood(self, target, depth=0):
+    def likelihood(self, target=None):
         likelihood = None
+        target_val = self.val if target is None else target
 
+        #print(self.name, 'target', target_val)
         if len(self.parents) > 0:
             index_key = reduce(
                     lambda key, p: key + str(p.val),
@@ -28,10 +30,17 @@ class Bernoulli:
         else:
             likelihood = self.ps
 
+        #print(self.name, 'like before', likelihood)
         # If we're asking about False, then it's 1 - p.
-        if target == 0:
+        if target_val == 0:
             likelihood = 1 - likelihood
 
+        #print(self.name, target, likelihood)
+
+        return likelihood
+
+    def complete_conditional(self, target):
+        #print(self.name, 'complete', target)
         # This hack may require some repentance, but it gets the job done.
         #   When doing the likelihood for the children, they'll need to use the
         #   hypothetical value of this node, and not the actualy. So, we'll set
@@ -43,26 +52,33 @@ class Bernoulli:
         old_val = self.val
         self.val = target
 
-        if depth > 0 and len(self.children) > 0:
-            likelihood = reduce(
-                    lambda l, child: l * child.likelihood(child.val),
-                    self.children,
-                    likelihood,
-                )
+        likelihood = self.likelihood(target=target)
+
+        prob = reduce(
+                lambda p, child: p * child.likelihood(),
+                self.children,
+                likelihood,
+            )
 
         self.val = old_val
 
-        return likelihood
+        return prob
 
     def sample(self):
         if self.observed:
             return self.val
 
-        t_likelihood = self.likelihood(1, depth=1)
-        f_likelihood = self.likelihood(0, depth=1)
-        normalized_likelihood = t_likelihood / (t_likelihood + f_likelihood)
+        t_prob = self.complete_conditional(target=1)
+        #print(self.name, 't_prob', t_prob)
+        f_prob = self.complete_conditional(target=0)
+        #print(self.name, 'f_prob', f_prob)
+        normalized_prob = t_prob / (t_prob + f_prob)
 
-        self.val = numpy.random.binomial(1, normalized_likelihood)
+        #print(self.name, 'sample', t_prob, f_prob, normalized_prob)
+
+        self.val = numpy.random.binomial(1, normalized_prob)
+
+        #print('****', self.name, 'got sample', self.val)
 
         return self.val
 
