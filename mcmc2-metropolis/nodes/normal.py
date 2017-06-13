@@ -1,6 +1,5 @@
-from math import (log, sqrt)
+from math import (sqrt)
 import numpy
-import random
 import scipy.stats
 import scipy.misc
 
@@ -46,46 +45,20 @@ class Normal(Node):
         self.var.add_child(self)
 
     def likelihood(self, value=None):
-        target = self.val if value is None else value
+        target = self.value() if value is None else value
 
         return scipy.stats.norm.logpdf(
                 target,
-                self.mean.val,
-                sqrt(self.var.val)
+                self.mean.value(),
+                sqrt(self.var.value())
             )
 
-    def sample(self):
-        # get a candidate value
-        cand = numpy.random.normal(self.val, self.candidate_standard_deviation)
+    def pdf(self, val):
+        return scipy.stats.norm.pdf(
+                val,
+                self.mean.value(),
+                sqrt(self.var.value())
+            )
 
-        #print('cand', cand)
-
-        old_val = self.val
-
-        reject_likelihood = self.likelihood(old_val)
-        accept_likelihood = self.likelihood(cand)
-
-        # factor in the children with the curernt value
-        for child in self.children:
-            reject_likelihood += child.likelihood()
-
-        # get the likelihood of the candidate value
-        self.val = cand
-
-        for child in self.children:
-            accept_likelihood += child.likelihood()
-
-        u = log(random.random())
-
-        #print('r', reject_likelihood)
-        #print('a', accept_likelihood)
-        #print('u', u)
-
-        # set it back if staying is more likely
-        if u >= accept_likelihood - reject_likelihood:
-            #print('set it back')
-            self.val = old_val
-        
-        return self.val
-
-
+    def in_support(self, val):
+        return True
