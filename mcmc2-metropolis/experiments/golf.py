@@ -22,7 +22,7 @@ hyper_tourn_mean = Normal(
     mean=72,
     var=2,
     val=72,
-    candidate_standard_deviation=6,
+    candidate_standard_deviation=4,
 )
 nodes.append(hyper_tourn_mean)
 
@@ -31,7 +31,7 @@ hyper_tourn_var = InverseGamma(
     alpha=18,
     beta=.015,
     val=.00075,
-    candidate_standard_deviation=.03,
+    candidate_standard_deviation=.05,
 )
 nodes.append(hyper_tourn_var)
 
@@ -52,7 +52,7 @@ hyper_golfer_var = InverseGamma(
     alpha=18,
     beta=.015,
     val=.00075,
-    candidate_standard_deviation=.03,
+    candidate_standard_deviation=.05,
 )
 nodes.append(hyper_golfer_var)
 
@@ -73,7 +73,7 @@ obsvar = InverseGamma(
     alpha=83,
     beta=.0014,
     val=.000015,
-    candidate_standard_deviation=.003,
+    candidate_standard_deviation=.03,
 )
 nodes.append(obsvar)
 
