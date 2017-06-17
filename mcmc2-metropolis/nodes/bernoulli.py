@@ -27,6 +27,12 @@ class Bernoulli(Node):
         for parent in self.parents:
             parent.add_child(self)
 
+        if isinstance(self.ps, dict):
+            for val in self.ps.values():
+                val.add_child(self)
+        else:
+            self.ps.add_child(self)
+
     def p_index(self):
         return tuple([ p.value() for p in self.parents ])
 
@@ -94,7 +100,7 @@ class Bernoulli(Node):
 
         log_rand = math.log(numpy.random.random())
 
-        print(self.name, 'sample: t_prob', t_prob, 'log_rand', log_rand)
+        #print(self.name, 'sample: t_prob', t_prob, 'log_rand', log_rand)
 
         if log_rand < t_prob:
             self.val = 1

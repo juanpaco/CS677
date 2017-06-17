@@ -62,12 +62,10 @@ class Beta(Node):
             )
 
     def pdf(self, val):
-        theta = 1 / self.beta.value()
-        
         return scipy.stats.beta.pdf(
                 val,
                 self.alpha.value(),
-                scale=theta,
+                self.beta.value(),
             )
 
     def in_support(self, val):

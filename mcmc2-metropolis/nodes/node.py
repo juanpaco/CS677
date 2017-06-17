@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import matplotlib.pylab as mlab
 import numpy
 import random
+import scipy.stats
 
 class Node:
     def __init__(
@@ -19,6 +20,7 @@ class Node:
         self.candidate_standard_deviation = candidate_standard_deviation
         self.children = []
         self.posteriors = []
+        self.rejected = 0
 
     def likelihood(self):
         raise NotImplementedError
@@ -41,6 +43,7 @@ class Node:
         #print(self.name, 'cand', cand)
 
         if not self.in_support(cand):
+            self.rejected = self.rejected + 1
             return self.val
 
         old_val = self.val
