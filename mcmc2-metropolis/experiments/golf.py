@@ -1,5 +1,4 @@
 import numpy
-import pickle
 
 from nodes import (Fixed, InverseGamma, Normal)
 from sample import (sample)
@@ -22,8 +21,8 @@ hyper_tourn_mean = Normal(
     'Tournament hyper mean',
     mean=72,
     var=2,
-    val=0,
-    candidate_standard_deviation=2,
+    val=72,
+    candidate_standard_deviation=6,
 )
 nodes.append(hyper_tourn_mean)
 
@@ -31,8 +30,8 @@ hyper_tourn_var = InverseGamma(
     'Tournament hyper variance',
     alpha=18,
     beta=.015,
-    val=3,
-    candidate_standard_deviation=2,
+    val=.00075,
+    candidate_standard_deviation=.03,
 )
 nodes.append(hyper_tourn_var)
 
@@ -42,7 +41,7 @@ for tournament in tournaments:
             tournament + ' mean',
             mean=hyper_tourn_mean,
             var=hyper_tourn_var,
-            val=0,
+            val=72,
             candidate_standard_deviation=1.414,
         )
 
@@ -52,8 +51,8 @@ hyper_golfer_var = InverseGamma(
     'Golfer hyper variance',
     alpha=18,
     beta=.015,
-    val=3,
-    candidate_standard_deviation=2,
+    val=.00075,
+    candidate_standard_deviation=.03,
 )
 nodes.append(hyper_golfer_var)
 
@@ -71,10 +70,10 @@ for golfer in golfers:
 
 obsvar = InverseGamma(
     'obsvar',
-    alpha=72,
+    alpha=83,
     beta=.0014,
-    val=3,
-    candidate_standard_deviation=2,
+    val=.000015,
+    candidate_standard_deviation=.003,
 )
 nodes.append(obsvar)
 
@@ -89,10 +88,14 @@ for (name, score, tourn) in data:
 
     nodes.append(node)
 
-sample(nodes, burn=1000, num_samples=0)
+sample(nodes, burn=1000, num_samples=10000)
 
-with open('golf-burn.pkl', 'wb') as f:
-    pickle.dump(nodes, f, pickle.HIGHEST_PROTOCOL)
-#
-##mean.mixplot()
-#mean.plot_posterior()
+hyper_tourn_mean.mixplot()
+hyper_tourn_mean.plot_posterior()
+hyper_tourn_var.mixplot()
+hyper_tourn_var.plot_posterior()
+hyper_golfer_var.mixplot()
+hyper_golfer_var.plot_posterior()
+obsvar.mixplot()
+obsvar.plot_posterior()
+

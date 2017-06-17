@@ -1,10 +1,9 @@
-from math import (sqrt)
+from math import (log, pi, sqrt)
 import numpy
 import scipy.stats
 import scipy.misc
 
-from .node import (Node)
-from .fixed import (Fixed)
+from .node import (Fixed, Node)
 
 class Normal(Node):
     def __init__(
@@ -36,9 +35,9 @@ class Normal(Node):
 
         if val is None:
             self.val = numpy.random.normal(
-                    self.mean.val,
-                    sqrt(self.var.val),
-                    1
+                    self.mean.value(),
+                    sqrt(self.var.value()),
+                    1,
                 )
 
         self.mean.add_child(self)
@@ -47,11 +46,10 @@ class Normal(Node):
     def likelihood(self, value=None):
         target = self.value() if value is None else value
 
-        return scipy.stats.norm.logpdf(
-                target,
-                self.mean.value(),
-                sqrt(self.var.value())
-            )
+        pi_term = log(2 * pi * self.var.value())
+        mean_term = (target - self.mean.value()) ** 2
+
+        return -0.5 * (pi_term + mean_term / self.var.value())
 
     def pdf(self, val):
         return scipy.stats.norm.pdf(

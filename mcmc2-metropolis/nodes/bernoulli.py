@@ -1,43 +1,43 @@
-import numpy
 from functools import reduce
+import math
+import numbers
+import numpy
+from scipy.misc import logsumexp
 
-class Bernoulli:
-    def __init__(self, name, ps=0.5, val=None, observed=False):
-        self.name = name + "(Bernoulli)"
-        self.ps = ps
+from .node import (Fixed, Node)
+
+class Bernoulli(Node):
+    def __init__(self, name, val=None, ps=0.5, parents=None, observed=False):
+        Node.__init__(
+                self,
+                '{} (Bernoulli)'.format(name),
+                val=val,
+                observed=observed,
+            )
+
+        if isinstance(ps, numbers.Number):
+            self.ps = Fixed('p for {}'.format(self.name), val=ps)
+        else:
+            self.ps = ps
+
         self.val = numpy.random.binomial(1, 0.5) if val is None else val
         self.observed = observed
-        self.parents = []
-        self.children = []
+        self.parents = [] if parents is None else parents
+
+        for parent in self.parents:
+            parent.add_child(self)
+
+    def p_index(self):
+        return tuple([ p.value() for p in self.parents ])
+
+    def p(self):
+        if len(self.parents) == 0:
+            return self.ps.value()
+        else:
+            return self.ps[self.p_index()].value()
 
     def likelihood(self, target=None):
-        likelihood = None
-        target_val = self.val if target is None else target
-
-        #print(self.name, 'target', target_val)
-        if len(self.parents) > 0:
-            index_key = reduce(
-                    lambda key, p: key + str(p.val),
-                    self.parents,
-                    '',
-                )
-            index = int(index_key, 2)
-
-            #print('index_key', index_key)
-            #print('index', index)
-
-            likelihood = self.ps[index]
-        else:
-            likelihood = self.ps
-
-        #print(self.name, 'like before', likelihood)
-        # If we're asking about False, then it's 1 - p.
-        if target_val == 0:
-            likelihood = 1 - likelihood
-
-        #print(self.name, target, likelihood)
-
-        return likelihood
+        return math.log(self.non_log_likelihood(target))
 
     def complete_conditional(self, target):
         #print(self.name, 'complete', target)
@@ -54,8 +54,10 @@ class Bernoulli:
 
         likelihood = self.likelihood(target=target)
 
+        #print(self.name, 'children:', self.children)
+
         prob = reduce(
-                lambda p, child: p * child.likelihood(),
+                lambda p, child: p + child.likelihood(),
                 self.children,
                 likelihood,
             )
@@ -64,26 +66,44 @@ class Bernoulli:
 
         return prob
 
-    def sample(self):
+    def non_log_likelihood(self, target=None):
+        target_val = self.val if target is None else target
+
+        p = self.p()
+
+        #print(self.name, 'like before', p)
+        # If we're asking about False, then it's 1 - p.
+        if target_val == 0:
+            p = 1 - p 
+
+        #print(self.name, target, p)
+
+        return p
+
+    def sample(self, isBurn=False):
         if self.observed:
             return self.val
 
-        t_prob = self.complete_conditional(target=1)
-        #print(self.name, 't_prob', t_prob)
-        f_prob = self.complete_conditional(target=0)
-        #print(self.name, 'f_prob', f_prob)
-        normalized_prob = t_prob / (t_prob + f_prob)
+        t_like = self.complete_conditional(target=1)
+        #print(self.name, 't_like', t_like)
+        f_like = self.complete_conditional(target=0)
+        #print(self.name, 'f_like', f_like)
+        denominator = logsumexp([ t_like, f_like ])
 
-        #print(self.name, 'sample', t_prob, f_prob, normalized_prob)
+        t_prob = t_like - denominator
 
-        self.val = numpy.random.binomial(1, normalized_prob)
+        log_rand = math.log(numpy.random.random())
+
+        print(self.name, 'sample: t_prob', t_prob, 'log_rand', log_rand)
+
+        if log_rand < t_prob:
+            self.val = 1
+        else:
+            self.val = 0
+
+        if isBurn is False:
+            self.posteriors.append(self.val)
 
         #print('****', self.name, 'got sample', self.val)
 
         return self.val
-
-    def add_parent(self, node):
-        self.parents.append(node)
-
-    def add_child(self, node):
-        self.children.append(node)

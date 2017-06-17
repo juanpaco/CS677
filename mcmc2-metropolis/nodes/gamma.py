@@ -4,7 +4,7 @@ import scipy.misc
 
 from .node import (Fixed, Node)
 
-class InverseGamma(Node):
+class Gamma(Node):
     def __init__(
             self,
             name,
@@ -16,7 +16,7 @@ class InverseGamma(Node):
             ):
         Node.__init__(
                 self,
-                name + ' (Inverse Gamma)',
+                name + ' (Gamma)',
                 val=val,
                 observed=observed,
                 candidate_standard_deviation=candidate_standard_deviation,
@@ -48,7 +48,7 @@ class InverseGamma(Node):
         #print(self.name, 'alpha', self.alpha.val)
         #print(self.name, 'not log', scipy.stats.invgamma.pdf(target, self.alpha.val, scale=theta))
 
-        return scipy.stats.invgamma.logpdf(
+        return scipy.stats.gamma.logpdf(
                 target,
                 self.alpha.value(),
                 scale=theta,
@@ -57,7 +57,7 @@ class InverseGamma(Node):
     def pdf(self, val):
         theta = 1 / self.beta.value()
         
-        return scipy.stats.invgamma.pdf(
+        return scipy.stats.gamma.pdf(
                 val,
                 self.alpha.value(),
                 scale=theta,

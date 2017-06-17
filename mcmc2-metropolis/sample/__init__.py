@@ -1,4 +1,5 @@
 from functools import reduce
+from tqdm import tqdm
 
 def collect_samples(nodes):
     return [ node.value() for node in nodes]
@@ -10,14 +11,12 @@ def tick(nodes, isBurn = False):
     return collect_samples(nodes)
 
 def sample(nodes, burn=1000, num_samples=1000):
-    for i in range(burn):
-        if i % 10 == 0:
-            print('burn', i)
+    for i in tqdm(range(burn), desc='(BURN) '):
         tick(nodes, isBurn = True)
 
     samples = []
 
-    for i in range(num_samples):
+    for i in tqdm(range(num_samples)):
         samples.append(tick(nodes))
 
     return samples

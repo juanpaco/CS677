@@ -4,7 +4,7 @@ import scipy.misc
 
 from .node import (Fixed, Node)
 
-class InverseGamma(Node):
+class Beta(Node):
     def __init__(
             self,
             name,
@@ -16,7 +16,7 @@ class InverseGamma(Node):
             ):
         Node.__init__(
                 self,
-                name + ' (Inverse Gamma)',
+                name + ' (Beta)',
                 val=val,
                 observed=observed,
                 candidate_standard_deviation=candidate_standard_deviation,
@@ -41,27 +41,34 @@ class InverseGamma(Node):
     def likelihood(self, value=None):
         target = self.value() if value is None else value
 
-        theta = 1 / self.beta.value()
+        if not self.in_support(target):
+            return 0
+
+        if self.alpha.value() <= 0:
+            return 0
+
+        if self.beta.value() <= 0:
+            return 0
 
         #print(self.name, 'scale', theta)
         #print(self.name, 'val', target)
         #print(self.name, 'alpha', self.alpha.val)
-        #print(self.name, 'not log', scipy.stats.invgamma.pdf(target, self.alpha.val, scale=theta))
+        #print(self.name, 'not log', scipy.stats.invbeta.pdf(target, self.alpha.val, scale=theta))
 
-        return scipy.stats.invgamma.logpdf(
+        return scipy.stats.beta.logpdf(
                 target,
                 self.alpha.value(),
-                scale=theta,
+                self.beta.value(),
             )
 
     def pdf(self, val):
         theta = 1 / self.beta.value()
         
-        return scipy.stats.invgamma.pdf(
+        return scipy.stats.beta.pdf(
                 val,
                 self.alpha.value(),
                 scale=theta,
             )
 
     def in_support(self, val):
-        return val > 0
+        return val > 0 and val < 1
