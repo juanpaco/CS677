@@ -36,6 +36,8 @@ class Poisson(Node):
         if target <= 0:
             return 0
 
+        print(self.name, 'targetf', target)
+
         #print(self.name, 'rate', self.rate.value())
         #print(self.name, 'target', target)
 
@@ -54,4 +56,5 @@ class Poisson(Node):
         return val >= 0
 
     def cleanse_val(self, val):
+        print(self.name, 'cleanse', val)
         return round(val)

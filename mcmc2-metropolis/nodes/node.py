@@ -21,13 +21,15 @@ class Node:
         self.children = []
         self.posteriors = []
         self.rejected = 0
+        self.stayed = 0
+        self.accepted = 0
 
     def likelihood(self):
         raise NotImplementedError
 
     def complete_conditional(self, target):
         return reduce(
-                lambda l, child: l * child.likelihood(),
+                lambda l, child: l + child.likelihood(),
                 self.children,
                 self.likelihood()
             )
@@ -40,10 +42,14 @@ class Node:
         cand = numpy.random.normal(self.val, self.candidate_standard_deviation)
         cand = self.cleanse_val(cand)
 
-        #print(self.name, 'cand', cand)
+        print(self.name, 'cand', cand)
 
         if not self.in_support(cand):
-            self.rejected = self.rejected + 1
+            print('*****', self.name, 'reject', cand)
+            if not isBurn:
+                self.posteriors.append(self.val)
+                self.rejected = self.rejected + 1
+                self.stayed = self.stayed + 1
             return self.val
 
         old_val = self.val
@@ -63,14 +69,20 @@ class Node:
 
         u = log(random.random())
 
-        #print(self.name, 'r', reject_likelihood)
-        #print(self.name, 'a', accept_likelihood)
-        #print(self.name, 'u', u)
+        print(self.name, 'r', reject_likelihood)
+        print(self.name, 'a', accept_likelihood)
+        print(self.name, 'u', u)
 
         # set it back if staying is more likely
         if u >= accept_likelihood - reject_likelihood:
-            #print(self.name, 'set it back')
+            print(self.name, 'set it back')
             self.val = old_val
+            if not isBurn:
+                self.stayed = self.stayed + 1
+        else:
+            print(self.name, 'keep the cand', cand)
+            if not isBurn:
+                self.accepted = self.accepted + 1
 
         if not isBurn:
           self.posteriors.append(self.val)
@@ -91,7 +103,7 @@ class Node:
         xs, ys = zip(*enumerate(self.posteriors))
 
         plt.plot(xs, ys)
-        plt.title('{} mixing'.format(self.name))
+        plt.title('{} mixing:{}'.format(self.name, self.candidate_standard_deviation))
         plt.show()
         #plt.savefig(self.name + '-mixplot.png')
         #plt.close()
@@ -104,11 +116,11 @@ class Node:
         ys = [self.pdf(x) for x in xs]
         plt.plot(xs, ys, label='Priot Dist ' + self.name)
 
-        plt.title('Prior Dist {}'.format(self.name))
+        plt.title('Prior Dist {}:{}'.format(self.name, self.candidate_standard_deviation))
         plt.hist(self.posteriors, bins=30, normed=True, label="Posterior Dist " + self.name)
         plt.show()
-        #plt.savefig(self.name + '-posterior.png')
-        #plt.close()
+        plt.savefig(self.name + '-posterior.png')
+        plt.close()
 
     def __add__(self, other):
         return Add(self, other)

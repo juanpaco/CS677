@@ -82,7 +82,7 @@ class Bernoulli(Node):
         if target_val == 0:
             p = 1 - p 
 
-        #print(self.name, target, p)
+        print(self.name, target, p)
 
         return p
 
