@@ -14,7 +14,7 @@ class Poisson(Node):
             ):
         Node.__init__(
                 self,
-                name + ' (Poisson)',
+                name + '-(Poisson)',
                 val=val,
                 observed=observed,
                 candidate_standard_deviation=candidate_standard_deviation,
@@ -34,9 +34,9 @@ class Poisson(Node):
         target = self.value() if value is None else value
 
         if target <= 0:
-            return 0
+            return numpy.NINF
 
-        print(self.name, 'targetf', target)
+        #print(self.name, 'targetf', target)
 
         #print(self.name, 'rate', self.rate.value())
         #print(self.name, 'target', target)
@@ -56,5 +56,5 @@ class Poisson(Node):
         return val >= 0
 
     def cleanse_val(self, val):
-        print(self.name, 'cleanse', val)
+        #print(self.name, 'cleanse', val)
         return round(val)

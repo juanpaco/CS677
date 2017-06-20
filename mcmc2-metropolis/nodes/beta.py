@@ -16,7 +16,7 @@ class Beta(Node):
             ):
         Node.__init__(
                 self,
-                name + ' (Beta)',
+                name + '-(Beta)',
                 val=val,
                 observed=observed,
                 candidate_standard_deviation=candidate_standard_deviation,
@@ -42,13 +42,13 @@ class Beta(Node):
         target = self.value() if value is None else value
 
         if not self.in_support(target):
-            return 0
+            return -100
 
-        if self.alpha.value() <= 0:
-            return 0
+        #if self.alpha.value() <= 0:
+        #    return -100
 
-        if self.beta.value() <= 0:
-            return 0
+        #if self.beta.value() <= 0:
+        #    return -100
 
         #print(self.name, 'scale', theta)
         #print(self.name, 'val', target)

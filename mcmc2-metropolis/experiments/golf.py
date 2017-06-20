@@ -3,6 +3,8 @@ import numpy
 from nodes import (Fixed, InverseGamma, Normal)
 from sample import (sample)
 
+nsamples = 10000
+
 def load_line(line):
     elements = line.rstrip().split()
 
@@ -88,7 +90,24 @@ for (name, score, tourn) in data:
 
     nodes.append(node)
 
-sample(nodes, burn=1000, num_samples=10000)
+sample(nodes, burn=1000, num_samples=nsamples)
+
+ability = []
+for name, mean in golfer_means.items():
+    mean.mixplot()
+    mean.plot_posterior()
+    samples = mean.posteriors[:]
+    samples.sort()
+    median = samples[nsamples//2]
+    low = samples[int(.05 * nsamples)]
+    high = samples[int(.95 * nsamples)]
+    ability.append( (name, low, median, high) )
+    
+ability.sort(key=lambda a: a[2])
+i = 1
+for golfer, low, median, high in ability:
+    print('{}: {} {}; 90%% interval: ({}, {})'.format(i, golfer, median, low, high))
+    i += 1
 
 hyper_tourn_mean.mixplot()
 hyper_tourn_mean.plot_posterior()

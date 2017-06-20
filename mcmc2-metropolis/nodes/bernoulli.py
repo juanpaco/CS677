@@ -10,7 +10,7 @@ class Bernoulli(Node):
     def __init__(self, name, val=None, ps=0.5, parents=None, observed=False):
         Node.__init__(
                 self,
-                '{} (Bernoulli)'.format(name),
+                '{}-(Bernoulli)'.format(name),
                 val=val,
                 observed=observed,
             )
@@ -82,7 +82,7 @@ class Bernoulli(Node):
         if target_val == 0:
             p = 1 - p 
 
-        print(self.name, target, p)
+        #print(self.name, target, p)
 
         return p
 
@@ -113,3 +113,6 @@ class Bernoulli(Node):
         #print('****', self.name, 'got sample', self.val)
 
         return self.val
+
+    def in_support(val):
+        return val == 1 or val == 0

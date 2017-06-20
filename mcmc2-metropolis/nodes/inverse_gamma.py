@@ -16,7 +16,7 @@ class InverseGamma(Node):
             ):
         Node.__init__(
                 self,
-                name + ' (Inverse Gamma)',
+                name + '-(Inverse Gamma)',
                 val=val,
                 observed=observed,
                 candidate_standard_deviation=candidate_standard_deviation,

@@ -16,7 +16,7 @@ class Gamma(Node):
             ):
         Node.__init__(
                 self,
-                name + ' (Gamma)',
+                name + '-(Gamma)',
                 val=val,
                 observed=observed,
                 candidate_standard_deviation=candidate_standard_deviation,

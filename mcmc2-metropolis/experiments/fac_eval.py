@@ -39,5 +39,7 @@ for datum in data:
 
 sample(nodes, num_samples=10000)
 
-#mean.mixplot()
+mean.mixplot()
 mean.plot_posterior()
+variance.mixplot()
+variance.plot_posterior()

@@ -12,7 +12,8 @@ class Node:
             name,
             val=None,
             observed=False,
-            candidate_standard_deviation=1
+            candidate_standard_deviation=1,
+            save_samples=False
         ):
         self.name = name
         self.val = val
@@ -24,6 +25,11 @@ class Node:
         self.stayed = 0
         self.accepted = 0
 
+        #if save_samples:
+        #    self.file = open(self.name, 'w')
+        #else:
+        #    self.file = None
+
     def likelihood(self):
         raise NotImplementedError
 
@@ -34,22 +40,28 @@ class Node:
                 self.likelihood()
             )
 
+    def save_sample(self, val):
+        if self.file:
+            self.file.write('{}\n'.format(self.val))
+
     def sample(self, isBurn=False):
         if self.observed:
+            #self.save_sample()
             return self.val
 
         # get a candidate value
         cand = numpy.random.normal(self.val, self.candidate_standard_deviation)
         cand = self.cleanse_val(cand)
 
-        print(self.name, 'cand', cand)
+        #print(self.name, 'cand', cand)
 
         if not self.in_support(cand):
-            print('*****', self.name, 'reject', cand)
+            #print('*****', self.name, 'reject', cand)
             if not isBurn:
                 self.posteriors.append(self.val)
                 self.rejected = self.rejected + 1
                 self.stayed = self.stayed + 1
+                #self.save_sample()
             return self.val
 
         old_val = self.val
@@ -69,24 +81,25 @@ class Node:
 
         u = log(random.random())
 
-        print(self.name, 'r', reject_likelihood)
-        print(self.name, 'a', accept_likelihood)
-        print(self.name, 'u', u)
+        #print(self.name, 'r', reject_likelihood)
+        #print(self.name, 'a', accept_likelihood)
+        #print(self.name, 'u', u)
 
         # set it back if staying is more likely
         if u >= accept_likelihood - reject_likelihood:
-            print(self.name, 'set it back')
+            #print(self.name, 'set it back')
             self.val = old_val
             if not isBurn:
                 self.stayed = self.stayed + 1
         else:
-            print(self.name, 'keep the cand', cand)
+            #print(self.name, 'keep the cand', cand)
             if not isBurn:
                 self.accepted = self.accepted + 1
 
         if not isBurn:
           self.posteriors.append(self.val)
-        
+          #self.save_sample()
+
         return self.val
 
     def cleanse_val(self, val):
@@ -99,28 +112,39 @@ class Node:
     def add_child(self, child):
         self.children.append(child)
 
-    def mixplot(self):
+    def mixplot(self, write=False):
+        if (len(self.posteriors) == 0):
+            return
+
         xs, ys = zip(*enumerate(self.posteriors))
 
         plt.plot(xs, ys)
-        plt.title('{} mixing:{}'.format(self.name, self.candidate_standard_deviation))
-        plt.show()
-        #plt.savefig(self.name + '-mixplot.png')
-        #plt.close()
 
-    def plot_posterior(self):
-        sample_min = min(self.posteriors)
-        sample_max = max(self.posteriors)
+        if write:
+            plt.savefig(self.name + '-mixplot.png')
+            plt.close()
+        else:
+          plt.show()
 
-        xs = mlab.frange(sample_min, sample_max, (sample_max - sample_min) / 100)
-        ys = [self.pdf(x) for x in xs]
-        plt.plot(xs, ys, label='Priot Dist ' + self.name)
+    def plot_posterior(self, write=False):
+        if (len(self.posteriors) == 0):
+            return
+        #sample_min = min(self.posteriors)
+        #sample_max = max(self.posteriors)
 
-        plt.title('Prior Dist {}:{}'.format(self.name, self.candidate_standard_deviation))
+        #xs = mlab.frange(sample_min, sample_max, (sample_max - sample_min) / 100)
+        #ys = [self.pdf(x) for x in xs]
+        #plt.plot(xs, ys, label='Priot Dist ' + self.name)
+
+        #plt.title('Prior Dist {}:{}'.format(self.name, self.candidate_standard_deviation))
+        plt.title('Posterior {}'.format(self.name))
         plt.hist(self.posteriors, bins=30, normed=True, label="Posterior Dist " + self.name)
-        plt.show()
-        plt.savefig(self.name + '-posterior.png')
-        plt.close()
+
+        if write:
+            plt.savefig(self.name + '-posterior.png')
+            plt.close()
+        else:
+          plt.show()
 
     def __add__(self, other):
         return Add(self, other)

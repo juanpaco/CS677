@@ -17,7 +17,7 @@ class Normal(Node):
             ):
         Node.__init__(
                 self,
-                name + ' (Normal)',
+                name + '-(Normal)',
                 val=val,
                 observed=observed,
                 candidate_standard_deviation=candidate_standard_deviation,
@@ -38,7 +38,7 @@ class Normal(Node):
                     self.mean.value(),
                     sqrt(self.var.value()),
                     1,
-                )
+                )[0]
 
         self.mean.add_child(self)
         self.var.add_child(self)
@@ -47,17 +47,17 @@ class Normal(Node):
         self.original_var = self.var.value()
 
     def likelihood(self, value=None):
-        print(self.name, self.mean.value(), self.var.value(), self.value())
+        #print(self.name, self.mean.value(), self.var.value(), self.value())
         if (self.var.value() <= 0):
-            return 1
+            return -100
 
         target = self.value() if value is None else value
 
-        print(self.name, 'target', target, 'mean', self.mean.value(), 'var', self.var.value())
+        #print(self.name, 'target', target, 'mean', self.mean.value(), 'var', self.var.value())
         pi_term = log(2 * pi * self.var.value())
         mean_term = (target - self.mean.value()) ** 2
 
-        return -0.5 * (pi_term + mean_term / self.var.value())
+        return -0.5 * (pi_term + (mean_term / self.var.value()))
 
     def pdf(self, val):
         return scipy.stats.norm.pdf(
